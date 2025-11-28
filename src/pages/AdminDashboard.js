@@ -231,17 +231,7 @@ function showAdModal(ad = null) {
           />
         </div>
         <div class="form-group">
-          <label class="form-label">Position</label>
-          <select class="input-select" id="ad-position">
-            <option value="top" ${ad?.position === 'top' ? 'selected' : ''}>Haut de page</option>
-            <option value="bottom" ${ad?.position === 'bottom' ? 'selected' : ''}>Bas de page</option>
-          </select>
-          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
-            Les bannières sont affichées dans le contenu de la page (pas en overlay)
-          </p>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Ordre d'affichage</label>
+          <label class="form-label">Ordre d'affichage (rotation toutes les 5 secondes)</label>
           <input
             type="number"
             class="form-input"
@@ -251,6 +241,9 @@ function showAdModal(ad = null) {
             min="1"
             required
           />
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            Les bannières tournent automatiquement sous le header
+          </p>
         </div>
         <div class="form-group">
           <label class="checkbox-wrapper">
@@ -286,7 +279,6 @@ function showAdModal(ad = null) {
       title: document.getElementById('ad-title').value,
       image_url: document.getElementById('ad-image-url').value,
       link_url: document.getElementById('ad-link-url').value,
-      position: document.getElementById('ad-position').value,
       display_order: parseInt(document.getElementById('ad-order').value),
       is_active: document.getElementById('ad-active').checked
     };
