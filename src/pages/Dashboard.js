@@ -11,6 +11,7 @@ import { availableServices, serviceCategories } from '../services.js';
 import { generateCode } from '../codeGenerator.js';
 import { showToast, formatDate, copyToClipboard, escapeHtml } from '../utils.js';
 import { getPlatformAds, isAdmin } from '../platformAds.js';
+import { insertPlatformAds } from '../components/PlatformAds.js';
 
 let currentUser = null;
 let currentProfile = null;
@@ -60,6 +61,7 @@ function render() {
   `;
 
   attachEventListeners();
+  insertPlatformAds();
 }
 
 function renderHeader() {

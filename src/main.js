@@ -7,7 +7,6 @@ import { renderForgotPassword } from './pages/ForgotPassword.js';
 import { renderResetPassword } from './pages/ResetPassword.js';
 import { renderDashboard } from './pages/Dashboard.js';
 import { renderAdminDashboard } from './pages/AdminDashboard.js';
-import { insertPlatformAds } from './components/PlatformAds.js';
 
 const routes = [
   { path: '/', handler: handleHome },
@@ -33,9 +32,7 @@ async function handleHome() {
   }
 }
 
-const router = new Router(routes, async () => {
-  await insertPlatformAds();
-});
+const router = new Router(routes);
 
 onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN') {
