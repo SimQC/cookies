@@ -66,17 +66,11 @@ export async function isAdmin() {
 }
 
 export async function trackAdView(adId) {
-  const userIsAdmin = await isAdmin();
-  if (userIsAdmin) return;
-
   const { error } = await supabase.rpc('increment_ad_views', { ad_id: adId });
   if (error) console.error('Error tracking ad view:', error);
 }
 
 export async function trackAdClick(adId) {
-  const userIsAdmin = await isAdmin();
-  if (userIsAdmin) return;
-
   const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: adId });
   if (error) console.error('Error tracking ad click:', error);
 }

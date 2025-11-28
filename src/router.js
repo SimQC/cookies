@@ -30,9 +30,9 @@ export class Router {
       const app = document.querySelector('#app');
 
       if (app && !this.skipTransition) {
+        app.style.transition = 'opacity 0.15s ease-out';
         app.style.opacity = '0';
-        app.style.transition = 'opacity 0.2s ease-in-out';
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
 
       await route.handler();
@@ -43,6 +43,7 @@ export class Router {
 
       if (app) {
         if (!this.skipTransition) {
+          app.style.transition = 'opacity 0.15s ease-in';
           requestAnimationFrame(() => {
             app.style.opacity = '1';
           });
