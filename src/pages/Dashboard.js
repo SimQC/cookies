@@ -24,9 +24,6 @@ let userIsAdmin = false;
 let activeTab = 'config';
 
 export async function renderDashboard() {
-  const app = document.querySelector('#app');
-  app.style.opacity = '0';
-
   try {
     currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -47,11 +44,6 @@ export async function renderDashboard() {
     }
 
     render();
-
-    requestAnimationFrame(() => {
-      app.style.transition = 'opacity 0.3s ease-in-out';
-      app.style.opacity = '1';
-    });
   } catch (error) {
     showToast('Erreur lors du chargement du dashboard', 'error');
     console.error(error);

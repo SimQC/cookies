@@ -24,10 +24,25 @@ export class Router {
 
     if (route) {
       this.currentRoute = route;
+
+      const app = document.querySelector('#app');
+      if (app) {
+        app.style.opacity = '0';
+        app.style.transition = 'opacity 0.2s ease-in-out';
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
       await route.handler();
 
       if (this.onRouteChange) {
         await this.onRouteChange();
+      }
+
+      if (app) {
+        requestAnimationFrame(() => {
+          app.style.opacity = '1';
+        });
       }
     }
   }

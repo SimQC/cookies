@@ -72,9 +72,12 @@ export async function renderLogin() {
     try {
       await signIn(email, password);
       showToast('Connexion réussie !', 'success');
-      window.history.pushState(null, null, '/dashboard');
-      const event = new PopStateEvent('popstate');
-      window.dispatchEvent(event);
+
+      setTimeout(() => {
+        window.history.pushState(null, null, '/dashboard');
+        const event = new PopStateEvent('popstate');
+        window.dispatchEvent(event);
+      }, 300);
     } catch (error) {
       errorDiv.innerHTML = `<p class="form-error">✗ ${error.message}</p>`;
       submitBtn.disabled = false;
