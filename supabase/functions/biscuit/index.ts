@@ -50,13 +50,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: platformAds } = await supabase
-      .from("platform_ads")
-      .select("*")
-      .eq("is_active", true)
-      .order("display_order", { ascending: true });
-
-    const jsCode = generateJavaScript(config, platformAds || []);
+    const jsCode = generateJavaScript(config);
 
     return new Response(jsCode, {
       status: 200,
@@ -78,7 +72,7 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-function generateJavaScript(config: any, banners: any[]): string {
+function generateJavaScript(config: any): string {
   const configData = config.config_data || {};
   const services = config.selected_services || [];
 
@@ -88,11 +82,6 @@ function generateJavaScript(config: any, banners: any[]): string {
       services.map((service: string) => {
         return `// tarteaucitron.user.${service} = 'YOUR_${service.toUpperCase()}_ID';`;
       }).join("\n");
-  }
-
-  let bannersCode = "";
-  if (banners.length > 0) {
-    bannersCode = "\n\n" + generateBannersCode(banners);
   }
 
   const tarteaucitronScript = `
@@ -105,68 +94,5 @@ function generateJavaScript(config: any, banners: any[]): string {
   document.head.appendChild(script);
 })();`;
 
-  return tarteaucitronScript + bannersCode;
-}
-
-function generateBannersCode(banners: any[]): string {
-  const styles = `
-var biscuitStyles = document.createElement('style');
-biscuitStyles.textContent = \`
-  .biscuit-banner {
-    position: fixed;
-    z-index: 999;
-    background: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 8px;
-    border-radius: 8px;
-  }
-  .biscuit-banner.top {
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .biscuit-banner.bottom {
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .biscuit-banner.left {
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .biscuit-banner.right {
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .biscuit-banner img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-  }
-  @media (max-width: 768px) {
-    .biscuit-banner.left,
-    .biscuit-banner.right {
-      left: 10px;
-      right: 10px;
-      top: auto;
-      bottom: 80px;
-      transform: none;
-    }
-  }
-\`;
-document.head.appendChild(biscuitStyles);
-`;
-
-  const bannersHTML = banners
-    .map((banner) => `
-var banner${banner.id.replace(/-/g, '')} = document.createElement('div');
-banner${banner.id.replace(/-/g, '')}.className = 'biscuit-banner ${banner.position}';
-banner${banner.id.replace(/-/g, '')}.innerHTML = '<a href="${banner.link_url}" target="_blank" rel="noopener noreferrer"><img src="${banner.image_url}" alt="Advertisement" /></a>';
-document.body.appendChild(banner${banner.id.replace(/-/g, '')});`
-    )
-    .join("");
-
-  return styles + bannersHTML;
+  return tarteaucitronScript;
 }

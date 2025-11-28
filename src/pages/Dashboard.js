@@ -306,9 +306,6 @@ function renderCodeTab() {
         <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
           💡 Le code est hébergé sur nos serveurs et se met à jour automatiquement avec vos modifications
         </p>
-        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
-          📢 Les bannières publicitaires Biscuits sont automatiquement incluses
-        </p>
       </div>
 
       <div class="code-display">
@@ -327,7 +324,7 @@ function renderCodeTab() {
           Si vous préférez héberger le code vous-même, voici la version complète :
         </p>
         <div class="code-display">
-          <code id="full-code">${escapeHtml(generateCode(currentConfig, selectedServices, platformAds))}</code>
+          <code id="full-code">${escapeHtml(generateCode(currentConfig, selectedServices))}</code>
         </div>
         <button class="btn btn-secondary" id="copy-full-code-btn" style="margin-top: 1rem;">
           📋 Copier le code complet
@@ -468,7 +465,7 @@ function attachEventListeners() {
   const copyFullBtn = document.getElementById('copy-full-code-btn');
   if (copyFullBtn) {
     copyFullBtn.addEventListener('click', async () => {
-      const code = generateCode(currentConfig, selectedServices, platformAds);
+      const code = generateCode(currentConfig, selectedServices);
       try {
         await copyToClipboard(code);
         showToast('Code copié !', 'success');
