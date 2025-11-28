@@ -4,16 +4,13 @@ import {
   getConfiguration,
   createConfiguration,
   updateConfiguration,
-  deleteConfiguration,
-  getBanners,
-  createBanner,
-  updateBanner,
-  deleteBanner
+  deleteConfiguration
 } from '../database.js';
 import { defaultConfig, configOptions } from '../defaultConfig.js';
 import { availableServices, serviceCategories } from '../services.js';
 import { generateCode } from '../codeGenerator.js';
 import { showToast, formatDate, copyToClipboard, escapeHtml } from '../utils.js';
+import { getPlatformAds, isAdmin } from '../platformAds.js';
 
 let currentUser = null;
 let currentProfile = null;
@@ -21,7 +18,8 @@ let configurations = [];
 let selectedConfigId = null;
 let currentConfig = { ...defaultConfig };
 let selectedServices = [];
-let currentBanners = [];
+let platformAds = [];
+let userIsAdmin = false;
 let activeTab = 'config';
 
 export async function renderDashboard() {
@@ -36,6 +34,8 @@ export async function renderDashboard() {
 
     currentProfile = await getProfile(currentUser.id);
     configurations = await getConfigurations(currentUser.id);
+    platformAds = await getPlatformAds();
+    userIsAdmin = await isAdmin();
 
     if (configurations.length > 0 && !selectedConfigId) {
       selectedConfigId = configurations[0].id;
@@ -66,9 +66,10 @@ function renderHeader() {
   return `
     <header class="header">
       <div class="header-left">
-        <div class="logo">🍪 Biscuit</div>
+        <div class="logo">🍪 Biscuits</div>
       </div>
       <div class="header-right">
+        ${userIsAdmin ? '<button class="btn btn-secondary btn-small" id="admin-dashboard-btn" style="margin-right: 1rem;">Admin</button>' : ''}
         <span class="user-info">${currentProfile?.full_name || currentProfile?.email || ''}</span>
         <button class="btn-logout" id="logout-btn">Déconnexion</button>
       </div>
@@ -81,7 +82,7 @@ function renderEmptyState() {
     <div class="panel">
       <div class="empty-state">
         <div class="empty-state-icon">🍪</div>
-        <h2>Bienvenue sur Biscuit !</h2>
+        <h2>Bienvenue sur Biscuits !</h2>
         <p style="margin: 1rem 0 2rem;">Créez votre première configuration de bannière de consentement</p>
         <button class="btn btn-primary btn-small" id="create-first-config">
           Créer ma première configuration
@@ -138,9 +139,6 @@ function renderTabs() {
       <button class="tab ${activeTab === 'services' ? 'active' : ''}" data-tab="services">
         🔌 Services
       </button>
-      <button class="tab ${activeTab === 'banners' ? 'active' : ''}" data-tab="banners">
-        📢 Bannières publicitaires
-      </button>
       <button class="tab ${activeTab === 'code' ? 'active' : ''}" data-tab="code">
         💻 Code d'intégration
       </button>
@@ -157,8 +155,6 @@ function renderTabContent() {
       return renderConfigTab();
     case 'services':
       return renderServicesTab();
-    case 'banners':
-      return renderBannersTab();
     case 'code':
       return renderCodeTab();
     default:
@@ -289,50 +285,6 @@ function renderServicesTab() {
   `;
 }
 
-function renderBannersTab() {
-  return `
-    <div class="panel">
-      <div class="panel-header">
-        <h2 class="panel-title">📢 Bannières publicitaires</h2>
-        <button class="btn btn-primary btn-small" id="add-banner-btn">
-          + Ajouter une bannière
-        </button>
-      </div>
-      ${currentBanners.length === 0 ? `
-        <div class="empty-state">
-          <div class="empty-state-icon">📢</div>
-          <p>Aucune bannière publicitaire</p>
-          <p style="font-size: 0.875rem; color: var(--text-tertiary); margin-top: 0.5rem;">
-            Ajoutez des bannières pour monétiser votre site
-          </p>
-        </div>
-      ` : `
-        <div class="banner-list">
-          ${currentBanners.map(banner => `
-            <div class="banner-item">
-              <img src="${banner.image_url}" alt="Banner" class="banner-preview" />
-              <div class="banner-info">
-                <span class="banner-position">${banner.position}</span>
-                <a href="${banner.link_url}" target="_blank" class="banner-link">
-                  ${banner.link_url}
-                </a>
-              </div>
-              <div class="banner-actions">
-                <button class="btn-icon" data-edit-banner="${banner.id}" title="Modifier">
-                  ✏️
-                </button>
-                <button class="btn-icon" data-delete-banner="${banner.id}" title="Supprimer">
-                  🗑️
-                </button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `}
-    </div>
-  `;
-}
-
 function renderCodeTab() {
   const config = configurations.find(c => c.id === selectedConfigId);
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -345,7 +297,7 @@ function renderCodeTab() {
       </div>
 
       <div class="code-instructions">
-        <h3>Comment intégrer Biscuit sur votre site</h3>
+        <h3>Comment intégrer Biscuits sur votre site</h3>
         <ol>
           <li>Copiez le code ci-dessous</li>
           <li>Collez-le juste avant la balise <code>&lt;/head&gt;</code> de votre site</li>
@@ -353,6 +305,9 @@ function renderCodeTab() {
         </ol>
         <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
           💡 Le code est hébergé sur nos serveurs et se met à jour automatiquement avec vos modifications
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+          📢 Les bannières publicitaires Biscuits sont automatiquement incluses
         </p>
       </div>
 
@@ -372,7 +327,7 @@ function renderCodeTab() {
           Si vous préférez héberger le code vous-même, voici la version complète :
         </p>
         <div class="code-display">
-          <code id="full-code">${escapeHtml(generateCode(currentConfig, selectedServices, currentBanners))}</code>
+          <code id="full-code">${escapeHtml(generateCode(currentConfig, selectedServices, platformAds))}</code>
         </div>
         <button class="btn btn-secondary" id="copy-full-code-btn" style="margin-top: 1rem;">
           📋 Copier le code complet
@@ -389,7 +344,6 @@ async function loadConfiguration(configId) {
       selectedConfigId = config.id;
       currentConfig = config.config_data || { ...defaultConfig };
       selectedServices = config.selected_services || [];
-      currentBanners = await getBanners(config.id);
     }
   } catch (error) {
     showToast('Erreur lors du chargement de la configuration', 'error');
@@ -403,6 +357,15 @@ function attachEventListeners() {
     logoutBtn.addEventListener('click', async () => {
       await signOut();
       window.history.pushState(null, null, '/');
+      const event = new PopStateEvent('popstate');
+      window.dispatchEvent(event);
+    });
+  }
+
+  const adminDashboardBtn = document.getElementById('admin-dashboard-btn');
+  if (adminDashboardBtn) {
+    adminDashboardBtn.addEventListener('click', () => {
+      window.history.pushState(null, null, '/admin');
       const event = new PopStateEvent('popstate');
       window.dispatchEvent(event);
     });
@@ -486,35 +449,6 @@ function attachEventListeners() {
     });
   });
 
-  const addBannerBtn = document.getElementById('add-banner-btn');
-  if (addBannerBtn) {
-    addBannerBtn.addEventListener('click', () => showBannerModal());
-  }
-
-  document.querySelectorAll('[data-edit-banner]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const bannerId = e.currentTarget.dataset.editBanner;
-      const banner = currentBanners.find(b => b.id === bannerId);
-      if (banner) showBannerModal(banner);
-    });
-  });
-
-  document.querySelectorAll('[data-delete-banner]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const bannerId = e.currentTarget.dataset.deleteBanner;
-      if (confirm('Supprimer cette bannière ?')) {
-        try {
-          await deleteBanner(bannerId);
-          currentBanners = currentBanners.filter(b => b.id !== bannerId);
-          showToast('Bannière supprimée', 'success');
-          render();
-        } catch (error) {
-          showToast('Erreur lors de la suppression', 'error');
-        }
-      }
-    });
-  });
-
   const copyHostedBtn = document.getElementById('copy-hosted-code-btn');
   if (copyHostedBtn) {
     copyHostedBtn.addEventListener('click', async () => {
@@ -534,7 +468,7 @@ function attachEventListeners() {
   const copyFullBtn = document.getElementById('copy-full-code-btn');
   if (copyFullBtn) {
     copyFullBtn.addEventListener('click', async () => {
-      const code = generateCode(currentConfig, selectedServices, currentBanners);
+      const code = generateCode(currentConfig, selectedServices, platformAds);
       try {
         await copyToClipboard(code);
         showToast('Code copié !', 'success');
@@ -720,114 +654,3 @@ function showDeleteConfigModal() {
   });
 }
 
-function showBannerModal(banner = null) {
-  const isEdit = !!banner;
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">${isEdit ? 'Modifier' : 'Ajouter'} une bannière</h2>
-        <button class="modal-close">×</button>
-      </div>
-      <form id="banner-form">
-        <div class="form-group">
-          <label class="form-label">URL de l'image</label>
-          <input
-            type="url"
-            class="form-input"
-            id="image-url"
-            placeholder="https://example.com/banner.gif"
-            value="${banner?.image_url || ''}"
-            required
-          />
-          <div style="margin-top: 0.75rem;">
-            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Bannières suggérées :</p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-secondary btn-small use-banner-btn" data-banner-url="https://annuairelitteraire.com/wp-content/uploads/2025/07/banniere-idee-litteraire.gif" data-banner-link="https://ideelitteraire.com">
-                Bannière 1
-              </button>
-              <button type="button" class="btn btn-secondary btn-small use-banner-btn" data-banner-url="https://annuairelitteraire.com/wp-content/uploads/2025/11/banniere-bd.gif" data-banner-link="https://simonlacroix.net/produit/bandes-annonces-litteraires/">
-                Bannière 2
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">URL de destination</label>
-          <input
-            type="url"
-            class="form-input"
-            id="link-url"
-            placeholder="https://example.com"
-            value="${banner?.link_url || ''}"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Position</label>
-          <select class="input-select" id="position">
-            <option value="top" ${banner?.position === 'top' ? 'selected' : ''}>Haut</option>
-            <option value="bottom" ${banner?.position === 'bottom' ? 'selected' : ''}>Bas</option>
-            <option value="left" ${banner?.position === 'left' ? 'selected' : ''}>Gauche</option>
-            <option value="right" ${banner?.position === 'right' ? 'selected' : ''}>Droite</option>
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" id="cancel-btn">Annuler</button>
-          <button type="submit" class="btn btn-primary">${isEdit ? 'Modifier' : 'Ajouter'}</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
-  modal.querySelector('#cancel-btn').addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.remove();
-  });
-
-  modal.querySelectorAll('.use-banner-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const bannerUrl = e.target.dataset.bannerUrl;
-      const bannerLink = e.target.dataset.bannerLink;
-      document.getElementById('image-url').value = bannerUrl;
-      document.getElementById('link-url').value = bannerLink;
-    });
-  });
-
-  modal.querySelector('#banner-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const bannerData = {
-      config_id: selectedConfigId,
-      image_url: document.getElementById('image-url').value,
-      link_url: document.getElementById('link-url').value,
-      position: document.getElementById('position').value,
-      is_active: true,
-      display_order: currentBanners.length
-    };
-
-    try {
-      if (isEdit) {
-        await updateBanner(banner.id, bannerData);
-        const index = currentBanners.findIndex(b => b.id === banner.id);
-        if (index !== -1) {
-          currentBanners[index] = { ...currentBanners[index], ...bannerData };
-        }
-        showToast('Bannière modifiée !', 'success');
-      } else {
-        const newBanner = await createBanner(bannerData);
-        currentBanners.push(newBanner);
-        showToast('Bannière ajoutée !', 'success');
-      }
-      modal.remove();
-      render();
-    } catch (error) {
-      showToast('Erreur lors de l\'enregistrement', 'error');
-      console.error(error);
-    }
-  });
-}

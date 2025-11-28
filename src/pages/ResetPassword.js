@@ -8,7 +8,7 @@ export async function renderResetPassword() {
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-logo">
-          <h1>🍪 Biscuit</h1>
+          <h1>🍪 Biscuits</h1>
           <p>Nouveau mot de passe</p>
         </div>
 

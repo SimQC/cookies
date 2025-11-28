@@ -50,14 +50,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: banners } = await supabase
-      .from("banners")
+    const { data: platformAds } = await supabase
+      .from("platform_ads")
       .select("*")
-      .eq("config_id", configId)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
-    const jsCode = generateJavaScript(config, banners || []);
+    const jsCode = generateJavaScript(config, platformAds || []);
 
     return new Response(jsCode, {
       status: 200,

@@ -8,7 +8,7 @@ export async function renderForgotPassword() {
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-logo">
-          <h1>🍪 Biscuit</h1>
+          <h1>🍪 Biscuits</h1>
           <p>Réinitialisation du mot de passe</p>
         </div>
 

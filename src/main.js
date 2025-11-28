@@ -6,6 +6,7 @@ import { renderRegister } from './pages/Register.js';
 import { renderForgotPassword } from './pages/ForgotPassword.js';
 import { renderResetPassword } from './pages/ResetPassword.js';
 import { renderDashboard } from './pages/Dashboard.js';
+import { renderAdminDashboard } from './pages/AdminDashboard.js';
 
 const routes = [
   { path: '/', handler: handleHome },
@@ -13,6 +14,7 @@ const routes = [
   { path: '/forgot-password', handler: renderForgotPassword },
   { path: '/reset-password', handler: renderResetPassword },
   { path: '/dashboard', handler: renderDashboard },
+  { path: '/admin', handler: renderAdminDashboard },
   { path: '*', handler: handleHome }
 ];
 
