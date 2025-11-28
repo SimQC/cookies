@@ -66,21 +66,21 @@ export async function isAdmin() {
 }
 
 export async function getGlobalStats() {
-  const { data: configs, error: configError } = await supabase
+  const { count: configCount, error: configError } = await supabase
     .from('configurations')
-    .select('id', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true });
 
-  const { data: profiles, error: profileError } = await supabase
+  const { count: profileCount, error: profileError } = await supabase
     .from('profiles')
-    .select('id', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true });
 
   const { data: ads, error: adsError } = await supabase
     .from('platform_ads')
-    .select('views, clicks');
+    .select('views, clicks, is_active');
 
   return {
-    totalConfigurations: configs?.length || 0,
-    totalUsers: profiles?.length || 0,
+    totalConfigurations: configCount || 0,
+    totalUsers: profileCount || 0,
     totalViews: ads?.reduce((sum, ad) => sum + (ad.views || 0), 0) || 0,
     totalClicks: ads?.reduce((sum, ad) => sum + (ad.clicks || 0), 0) || 0,
     activeAds: ads?.filter(ad => ad.is_active).length || 0

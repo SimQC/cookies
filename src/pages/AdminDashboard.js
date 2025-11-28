@@ -77,7 +77,7 @@ function renderAdminContent() {
       <div class="panel-header">
         <h2 class="panel-title">📊 Statistiques globales de la plateforme</h2>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
         <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
           <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">👥 Utilisateurs</div>
           <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
