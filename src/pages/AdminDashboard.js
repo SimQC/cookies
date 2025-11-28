@@ -1,11 +1,12 @@
 import { getCurrentUser, getProfile, signOut } from '../auth.js';
-import { getAllPlatformAds, createPlatformAd, updatePlatformAd, deletePlatformAd, isAdmin } from '../platformAds.js';
+import { getAllPlatformAds, createPlatformAd, updatePlatformAd, deletePlatformAd, isAdmin, getGlobalStats } from '../platformAds.js';
 import { showToast, formatDate } from '../utils.js';
 
 let currentUser = null;
 let currentProfile = null;
 let platformAds = [];
 let userIsAdmin = false;
+let globalStats = null;
 
 export async function renderAdminDashboard() {
   try {
@@ -27,6 +28,7 @@ export async function renderAdminDashboard() {
 
     currentProfile = await getProfile(currentUser.id);
     platformAds = await getAllPlatformAds();
+    globalStats = await getGlobalStats();
 
     render();
   } catch (error) {
@@ -66,36 +68,48 @@ function renderHeader() {
 }
 
 function renderAdminContent() {
-  const totalViews = platformAds.reduce((sum, ad) => sum + (ad.views || 0), 0);
-  const totalClicks = platformAds.reduce((sum, ad) => sum + (ad.clicks || 0), 0);
+  const totalViews = globalStats?.totalViews || 0;
+  const totalClicks = globalStats?.totalClicks || 0;
   const averageCTR = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(2) : 0;
 
   return `
     <div class="panel" style="margin-bottom: 1.5rem;">
       <div class="panel-header">
-        <h2 class="panel-title">📊 Statistiques globales</h2>
+        <h2 class="panel-title">📊 Statistiques globales de la plateforme</h2>
       </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
         <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
-          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Bannières actives</div>
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">👥 Utilisateurs</div>
+          <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
+            ${globalStats?.totalUsers || 0}
+          </div>
+        </div>
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">⚙️ Configurations</div>
+          <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
+            ${globalStats?.totalConfigurations || 0}
+          </div>
+        </div>
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">📢 Bannières actives</div>
           <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
             ${platformAds.filter(ad => ad.is_active).length}
           </div>
         </div>
         <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
-          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total vues</div>
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">👁️ Vues totales</div>
           <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
             ${totalViews.toLocaleString()}
           </div>
         </div>
         <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
-          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total clics</div>
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">🖱️ Clics totaux</div>
           <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
             ${totalClicks.toLocaleString()}
           </div>
         </div>
         <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
-          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">CTR moyen</div>
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">📈 CTR moyen</div>
           <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
             ${averageCTR}%
           </div>

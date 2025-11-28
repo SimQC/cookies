@@ -5,7 +5,7 @@ export async function getPlatformAds() {
     .from('platform_ads')
     .select('*')
     .eq('is_active', true)
-    .order('display_order', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data || [];
@@ -15,7 +15,7 @@ export async function getAllPlatformAds() {
   const { data, error } = await supabase
     .from('platform_ads')
     .select('*')
-    .order('display_order', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data || [];
@@ -63,4 +63,26 @@ export async function isAdmin() {
   const { data, error } = await supabase.rpc('is_admin');
   if (error) return false;
   return data === true;
+}
+
+export async function getGlobalStats() {
+  const { data: configs, error: configError } = await supabase
+    .from('configurations')
+    .select('id', { count: 'exact', head: true });
+
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true });
+
+  const { data: ads, error: adsError } = await supabase
+    .from('platform_ads')
+    .select('views, clicks');
+
+  return {
+    totalConfigurations: configs?.length || 0,
+    totalUsers: profiles?.length || 0,
+    totalViews: ads?.reduce((sum, ad) => sum + (ad.views || 0), 0) || 0,
+    totalClicks: ads?.reduce((sum, ad) => sum + (ad.clicks || 0), 0) || 0,
+    activeAds: ads?.filter(ad => ad.is_active).length || 0
+  };
 }
