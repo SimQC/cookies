@@ -764,13 +764,13 @@ body {
 }
 
 .toast.success {
-  background: #16a34a;
-  border-color: #15803d;
+  background: linear-gradient(135deg, #9b7e52 0%, #8b7355 100%);
+  border-color: var(--biscuit-dark);
 }
 
 .toast.error {
-  background: #dc2626;
-  border-color: #b91c1c;
+  background: linear-gradient(135deg, #c68642 0%, #b8956a 100%);
+  border-color: var(--caramel);
 }
 
 .scrollable {
