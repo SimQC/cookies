@@ -903,7 +903,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .biscuits-ad-banner a {
@@ -936,7 +936,7 @@ body {
   }
 
   .biscuits-ad-banner {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 
   .biscuits-ad-banner img {
