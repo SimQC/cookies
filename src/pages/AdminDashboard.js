@@ -91,7 +91,6 @@ function renderAdminContent() {
                 <div style="font-weight: 600; color: var(--chocolate); margin-bottom: 0.25rem;">
                   ${ad.title}
                 </div>
-                <span class="banner-position">${ad.position}</span>
                 <span class="banner-position" style="background: ${ad.is_active ? '#16a34a' : '#dc2626'}; color: white;">
                   ${ad.is_active ? 'Active' : 'Inactive'}
                 </span>

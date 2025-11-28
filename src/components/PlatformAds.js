@@ -22,6 +22,8 @@ export async function insertPlatformAds() {
       return;
     }
 
+    currentAdIndex = Math.floor(Math.random() * allAds.length);
+
     const bannerContainer = document.createElement('div');
     bannerContainer.className = 'biscuits-ad-banner';
     adsContainer.innerHTML = '';
