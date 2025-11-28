@@ -1,10 +1,8 @@
-import { getPlatformAds, trackAdView, trackAdClick, isAdmin } from '../platformAds.js';
+import { getPlatformAds, trackAdView, trackAdClick } from '../platformAds.js';
 
 let currentAdIndex = 0;
 let allAds = [];
 let rotationInterval = null;
-let trackedViews = new Set();
-let userIsAdmin = false;
 
 export async function insertPlatformAds() {
   const adsContainer = document.querySelector('#platform-ads-container');
@@ -18,7 +16,6 @@ export async function insertPlatformAds() {
   }
 
   try {
-    userIsAdmin = await isAdmin();
     allAds = await getPlatformAds();
     if (allAds.length === 0) {
       adsContainer.innerHTML = '';
@@ -50,10 +47,7 @@ function showCurrentAd(container) {
 
   const ad = allAds[currentAdIndex];
 
-  if (!userIsAdmin && !trackedViews.has(ad.id)) {
-    trackAdView(ad.id);
-    trackedViews.add(ad.id);
-  }
+  trackAdView(ad.id);
 
   container.innerHTML = `
     <a href="${ad.link_url}" target="_blank" rel="noopener noreferrer" data-ad-id="${ad.id}" class="ad-link">
@@ -64,9 +58,7 @@ function showCurrentAd(container) {
   const adLink = container.querySelector('.ad-link');
   if (adLink) {
     adLink.addEventListener('click', () => {
-      if (!userIsAdmin) {
-        trackAdClick(ad.id);
-      }
+      trackAdClick(ad.id);
     });
   }
 }
