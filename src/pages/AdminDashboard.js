@@ -66,7 +66,43 @@ function renderHeader() {
 }
 
 function renderAdminContent() {
+  const totalViews = platformAds.reduce((sum, ad) => sum + (ad.views || 0), 0);
+  const totalClicks = platformAds.reduce((sum, ad) => sum + (ad.clicks || 0), 0);
+  const averageCTR = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(2) : 0;
+
   return `
+    <div class="panel" style="margin-bottom: 1.5rem;">
+      <div class="panel-header">
+        <h2 class="panel-title">📊 Statistiques globales</h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Bannières actives</div>
+          <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
+            ${platformAds.filter(ad => ad.is_active).length}
+          </div>
+        </div>
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total vues</div>
+          <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
+            ${totalViews.toLocaleString()}
+          </div>
+        </div>
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total clics</div>
+          <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
+            ${totalClicks.toLocaleString()}
+          </div>
+        </div>
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">CTR moyen</div>
+          <div style="font-size: 1.75rem; font-weight: 700; color: var(--chocolate);">
+            ${averageCTR}%
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">
         <h2 class="panel-title">📢 Gestion des bannières publicitaires</h2>
@@ -75,7 +111,7 @@ function renderAdminContent() {
         </button>
       </div>
       <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-        Ces bannières sont affichées sur toutes les pages de Biscuits et dans le code généré pour les utilisateurs.
+        Ces bannières sont affichées de manière aléatoire et tournent automatiquement toutes les 5 secondes.
       </p>
       ${platformAds.length === 0 ? `
         <div class="empty-state">
@@ -98,7 +134,10 @@ function renderAdminContent() {
                   ${ad.link_url}
                 </a>
                 <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.25rem;">
-                  Ordre: ${ad.display_order} • Créée ${formatDate(ad.created_at)}
+                  👁️ ${ad.views || 0} vues • 🖱️ ${ad.clicks || 0} clics • CTR: ${ad.views > 0 ? ((ad.clicks / ad.views) * 100).toFixed(2) : 0}%
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-tertiary);">
+                  Créée ${formatDate(ad.created_at)}
                 </div>
               </div>
               <div class="banner-actions">
@@ -230,21 +269,6 @@ function showAdModal(ad = null) {
           />
         </div>
         <div class="form-group">
-          <label class="form-label">Ordre d'affichage (rotation toutes les 5 secondes)</label>
-          <input
-            type="number"
-            class="form-input"
-            id="ad-order"
-            placeholder="1"
-            value="${ad?.display_order || platformAds.length + 1}"
-            min="1"
-            required
-          />
-          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
-            Les bannières tournent automatiquement sous le header
-          </p>
-        </div>
-        <div class="form-group">
           <label class="checkbox-wrapper">
             <input
               type="checkbox"
@@ -278,7 +302,6 @@ function showAdModal(ad = null) {
       title: document.getElementById('ad-title').value,
       image_url: document.getElementById('ad-image-url').value,
       link_url: document.getElementById('ad-link-url').value,
-      display_order: parseInt(document.getElementById('ad-order').value),
       is_active: document.getElementById('ad-active').checked
     };
 
