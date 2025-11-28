@@ -3,6 +3,7 @@ export class Router {
     this.routes = routes;
     this.currentRoute = null;
     this.onRouteChange = onRouteChange;
+    this.skipTransition = false;
 
     window.addEventListener('popstate', () => this.handleRoute());
     document.addEventListener('click', (e) => {
@@ -13,7 +14,8 @@ export class Router {
     });
   }
 
-  navigate(path) {
+  navigate(path, skipTransition = false) {
+    this.skipTransition = skipTransition;
     window.history.pushState(null, null, path);
     this.handleRoute();
   }
@@ -26,12 +28,12 @@ export class Router {
       this.currentRoute = route;
 
       const app = document.querySelector('#app');
-      if (app) {
+
+      if (app && !this.skipTransition) {
         app.style.opacity = '0';
         app.style.transition = 'opacity 0.2s ease-in-out';
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
-
-      await new Promise(resolve => setTimeout(resolve, 50));
 
       await route.handler();
 
@@ -40,10 +42,16 @@ export class Router {
       }
 
       if (app) {
-        requestAnimationFrame(() => {
+        if (!this.skipTransition) {
+          requestAnimationFrame(() => {
+            app.style.opacity = '1';
+          });
+        } else {
           app.style.opacity = '1';
-        });
+        }
       }
+
+      this.skipTransition = false;
     }
   }
 

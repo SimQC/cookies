@@ -37,8 +37,7 @@ const router = new Router(routes);
 onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN') {
     if (window.location.pathname === '/' || window.location.pathname === '/register') {
-      window.history.pushState(null, null, '/dashboard');
-      router.handleRoute();
+      router.navigate('/dashboard', true);
     }
   } else if (event === 'SIGNED_OUT') {
     if (window.location.pathname !== '/' && window.location.pathname !== '/register' && window.location.pathname !== '/forgot-password') {
