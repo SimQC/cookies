@@ -14,10 +14,10 @@ export class Router {
     });
   }
 
-  navigate(path, skipTransition = false) {
+  async navigate(path, skipTransition = false) {
     this.skipTransition = skipTransition;
     window.history.pushState(null, null, path);
-    this.handleRoute();
+    await this.handleRoute();
   }
 
   async handleRoute() {

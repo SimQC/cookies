@@ -34,15 +34,23 @@ async function handleHome() {
 
 const router = new Router(routes);
 
+let isNavigating = false;
+
 onAuthStateChange(async (event, session) => {
+  if (isNavigating) return;
+
   if (event === 'SIGNED_IN') {
     if (window.location.pathname === '/' || window.location.pathname === '/register') {
-      router.navigate('/dashboard', true);
+      isNavigating = true;
+      await router.navigate('/dashboard', true);
+      isNavigating = false;
     }
   } else if (event === 'SIGNED_OUT') {
     if (window.location.pathname !== '/' && window.location.pathname !== '/register' && window.location.pathname !== '/forgot-password') {
+      isNavigating = true;
       window.history.pushState(null, null, '/');
-      router.handleRoute();
+      await router.handleRoute();
+      isNavigating = false;
     }
   }
 });

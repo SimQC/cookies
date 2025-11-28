@@ -105,9 +105,6 @@ export async function renderRegister() {
     try {
       await signUp(email, password, fullName);
       showToast('Compte créé avec succès !', 'success');
-      window.history.pushState(null, null, '/dashboard');
-      const event = new PopStateEvent('popstate');
-      window.dispatchEvent(event);
     } catch (error) {
       errorDiv.innerHTML = `<p class="form-error">✗ ${error.message}</p>`;
       submitBtn.disabled = false;
