@@ -94,13 +94,18 @@ function renderEmptyState() {
 
 function renderDashboardContent() {
   return `
-    <div class="dashboard-grid">
-      <div class="sidebar">
-        ${renderConfigsList()}
+    <div class="dashboard-wrapper">
+      <div class="dashboard-grid">
+        <div class="sidebar">
+          ${renderConfigsList()}
+        </div>
+        <div class="main-content">
+          ${renderTabs()}
+          ${renderTabContent()}
+        </div>
       </div>
-      <div class="main-content">
-        ${renderTabs()}
-        ${renderTabContent()}
+      <div class="sidebar-ads">
+        <div id="platform-ads-container"></div>
       </div>
     </div>
   `;
