@@ -267,9 +267,58 @@ body {
   gap: 1rem;
 }
 
+.user-menu {
+  position: relative;
+}
+
 .user-info {
   font-size: var(--font-base);
   color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+}
+
+.user-info:hover {
+  background: var(--bg-tertiary);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateY(0);
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: var(--font-base);
+  color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+  background: var(--bg-tertiary);
 }
 
 .btn-logout {
@@ -808,6 +857,17 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

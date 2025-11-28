@@ -1,4 +1,4 @@
-import { getPlatformAds } from '../platformAds.js';
+import { getPlatformAds, trackAdView, trackAdClick } from '../platformAds.js';
 
 let currentAdIndex = 0;
 let allAds = [];
@@ -46,9 +46,19 @@ function showCurrentAd(container) {
   if (!allAds.length) return;
 
   const ad = allAds[currentAdIndex];
+
+  trackAdView(ad.id);
+
   container.innerHTML = `
-    <a href="${ad.link_url}" target="_blank" rel="noopener noreferrer">
+    <a href="${ad.link_url}" target="_blank" rel="noopener noreferrer" data-ad-id="${ad.id}" class="ad-link">
       <img src="${ad.image_url}" alt="${ad.title}" />
     </a>
   `;
+
+  const adLink = container.querySelector('.ad-link');
+  if (adLink) {
+    adLink.addEventListener('click', () => {
+      trackAdClick(ad.id);
+    });
+  }
 }

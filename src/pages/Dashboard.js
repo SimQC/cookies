@@ -1,4 +1,4 @@
-import { getCurrentUser, getProfile, signOut } from '../auth.js';
+import { getCurrentUser, getProfile, signOut, updatePassword } from '../auth.js';
 import {
   getConfigurations,
   getConfiguration,
@@ -24,6 +24,9 @@ let userIsAdmin = false;
 let activeTab = 'config';
 
 export async function renderDashboard() {
+  const app = document.querySelector('#app');
+  app.style.opacity = '0';
+
   try {
     currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -44,6 +47,11 @@ export async function renderDashboard() {
     }
 
     render();
+
+    requestAnimationFrame(() => {
+      app.style.transition = 'opacity 0.3s ease-in-out';
+      app.style.opacity = '1';
+    });
   } catch (error) {
     showToast('Erreur lors du chargement du dashboard', 'error');
     console.error(error);
@@ -72,8 +80,16 @@ function renderHeader() {
       </div>
       <div class="header-right">
         ${userIsAdmin ? '<button class="btn btn-secondary btn-small" id="admin-dashboard-btn" style="margin-right: 1rem;">Admin</button>' : ''}
-        <span class="user-info">${currentProfile?.full_name || currentProfile?.email || ''}</span>
-        <button class="btn-logout" id="logout-btn">Déconnexion</button>
+        <div class="user-menu">
+          <button class="user-info" id="user-menu-btn">
+            ${currentProfile?.full_name || currentProfile?.email || ''}
+            <span style="margin-left: 0.5rem;">▼</span>
+          </button>
+          <div class="dropdown-menu" id="user-dropdown" style="display: none;">
+            <button class="dropdown-item" id="change-password-btn">Changer le mot de passe</button>
+            <button class="dropdown-item" id="logout-btn">Déconnexion</button>
+          </div>
+        </div>
       </div>
     </header>
   `;
@@ -352,6 +368,27 @@ async function loadConfiguration(configId) {
 }
 
 function attachEventListeners() {
+  const userMenuBtn = document.getElementById('user-menu-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+  if (userMenuBtn && userDropdown) {
+    userMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.style.display = userDropdown.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', () => {
+      userDropdown.style.display = 'none';
+    });
+  }
+
+  const changePasswordBtn = document.getElementById('change-password-btn');
+  if (changePasswordBtn) {
+    changePasswordBtn.addEventListener('click', () => {
+      userDropdown.style.display = 'none';
+      showChangePasswordModal();
+    });
+  }
+
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
@@ -649,6 +686,75 @@ function showDeleteConfigModal() {
       render();
     } catch (error) {
       showToast('Erreur lors de la suppression', 'error');
+      console.error(error);
+    }
+  });
+}
+
+function showChangePasswordModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Changer le mot de passe</h2>
+        <button class="modal-close">×</button>
+      </div>
+      <form id="change-password-form">
+        <div class="form-group">
+          <label class="form-label">Nouveau mot de passe</label>
+          <input
+            type="password"
+            class="form-input"
+            id="new-password"
+            placeholder="Minimum 6 caractères"
+            required
+            minlength="6"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmer le mot de passe</label>
+          <input
+            type="password"
+            class="form-input"
+            id="confirm-password"
+            placeholder="Confirmez votre mot de passe"
+            required
+            minlength="6"
+          />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-btn">Annuler</button>
+          <button type="submit" class="btn btn-primary">Changer</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+  modal.querySelector('#cancel-btn').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+
+  modal.querySelector('#change-password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    if (newPassword !== confirmPassword) {
+      showToast('Les mots de passe ne correspondent pas', 'error');
+      return;
+    }
+
+    try {
+      await updatePassword(newPassword);
+      showToast('Mot de passe changé avec succès !', 'success');
+      modal.remove();
+    } catch (error) {
+      showToast('Erreur lors du changement de mot de passe', 'error');
       console.error(error);
     }
   });
