@@ -23,7 +23,14 @@ export async function renderPlatformAds(position = 'bottom') {
 
 export async function insertPlatformAds() {
   const appContainer = document.querySelector('.app-container');
-  if (!appContainer) return;
+  if (!appContainer) {
+    console.log('No .app-container found');
+    return;
+  }
+
+  // Remove existing ads
+  const existingAds = document.querySelectorAll('.biscuits-ads-top, .biscuits-ads-bottom');
+  existingAds.forEach(ad => ad.remove());
 
   const topAds = await renderPlatformAds('top');
   if (topAds) {

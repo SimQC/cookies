@@ -1,7 +1,8 @@
 export class Router {
-  constructor(routes) {
+  constructor(routes, onRouteChange = null) {
     this.routes = routes;
     this.currentRoute = null;
+    this.onRouteChange = onRouteChange;
 
     window.addEventListener('popstate', () => this.handleRoute());
     document.addEventListener('click', (e) => {
@@ -24,6 +25,10 @@ export class Router {
     if (route) {
       this.currentRoute = route;
       await route.handler();
+
+      if (this.onRouteChange) {
+        await this.onRouteChange();
+      }
     }
   }
 

@@ -33,7 +33,9 @@ async function handleHome() {
   }
 }
 
-const router = new Router(routes);
+const router = new Router(routes, async () => {
+  await insertPlatformAds();
+});
 
 onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN') {
@@ -50,7 +52,3 @@ onAuthStateChange(async (event, session) => {
 });
 
 router.start();
-
-setTimeout(() => {
-  insertPlatformAds();
-}, 500);
