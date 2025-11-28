@@ -5,8 +5,8 @@ let allAds = [];
 let rotationInterval = null;
 
 export async function insertPlatformAds() {
-  const appContainer = document.querySelector('.app-container');
-  if (!appContainer) {
+  const header = document.querySelector('.header');
+  if (!header) {
     return;
   }
 
@@ -26,7 +26,12 @@ export async function insertPlatformAds() {
 
     const bannerContainer = document.createElement('div');
     bannerContainer.className = 'biscuits-ad-banner';
-    appContainer.insertBefore(bannerContainer, appContainer.firstChild);
+
+    if (header.nextSibling) {
+      header.parentNode.insertBefore(bannerContainer, header.nextSibling);
+    } else {
+      header.parentNode.appendChild(bannerContainer);
+    }
 
     showCurrentAd(bannerContainer);
 
