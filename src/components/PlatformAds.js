@@ -1,12 +1,15 @@
 import { getPlatformAds } from '../platformAds.js';
 
-export async function renderPlatformAds() {
+export async function renderPlatformAds(position = 'bottom') {
   try {
     const ads = await getPlatformAds();
     if (ads.length === 0) return '';
 
-    return ads.map(ad => `
-      <div class="biscuits-ad biscuits-ad-${ad.position}" data-ad-id="${ad.id}">
+    const filteredAds = ads.filter(ad => ad.position === position);
+    if (filteredAds.length === 0) return '';
+
+    return filteredAds.map(ad => `
+      <div class="biscuits-ad" data-ad-id="${ad.id}">
         <a href="${ad.link_url}" target="_blank" rel="noopener noreferrer">
           <img src="${ad.image_url}" alt="${ad.title}" />
         </a>
@@ -18,13 +21,23 @@ export async function renderPlatformAds() {
   }
 }
 
-export function initPlatformAds() {
-  renderPlatformAds().then(adsHTML => {
-    if (adsHTML) {
-      const container = document.createElement('div');
-      container.id = 'biscuits-ads-container';
-      container.innerHTML = adsHTML;
-      document.body.appendChild(container);
-    }
-  });
+export async function insertPlatformAds() {
+  const appContainer = document.querySelector('.app-container');
+  if (!appContainer) return;
+
+  const topAds = await renderPlatformAds('top');
+  if (topAds) {
+    const topContainer = document.createElement('div');
+    topContainer.className = 'biscuits-ads-top';
+    topContainer.innerHTML = topAds;
+    appContainer.insertBefore(topContainer, appContainer.firstChild);
+  }
+
+  const bottomAds = await renderPlatformAds('bottom');
+  if (bottomAds) {
+    const bottomContainer = document.createElement('div');
+    bottomContainer.className = 'biscuits-ads-bottom';
+    bottomContainer.innerHTML = bottomAds;
+    appContainer.appendChild(bottomContainer);
+  }
 }

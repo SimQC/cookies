@@ -233,11 +233,12 @@ function showAdModal(ad = null) {
         <div class="form-group">
           <label class="form-label">Position</label>
           <select class="input-select" id="ad-position">
-            <option value="top" ${ad?.position === 'top' ? 'selected' : ''}>Haut</option>
-            <option value="bottom" ${ad?.position === 'bottom' ? 'selected' : ''}>Bas</option>
-            <option value="left" ${ad?.position === 'left' ? 'selected' : ''}>Gauche</option>
-            <option value="right" ${ad?.position === 'right' ? 'selected' : ''}>Droite</option>
+            <option value="top" ${ad?.position === 'top' ? 'selected' : ''}>Haut de page</option>
+            <option value="bottom" ${ad?.position === 'bottom' ? 'selected' : ''}>Bas de page</option>
           </select>
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            Les bannières sont affichées dans le contenu de la page (pas en overlay)
+          </p>
         </div>
         <div class="form-group">
           <label class="form-label">Ordre d'affichage</label>

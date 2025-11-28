@@ -7,7 +7,7 @@ import { renderForgotPassword } from './pages/ForgotPassword.js';
 import { renderResetPassword } from './pages/ResetPassword.js';
 import { renderDashboard } from './pages/Dashboard.js';
 import { renderAdminDashboard } from './pages/AdminDashboard.js';
-import { initPlatformAds } from './components/PlatformAds.js';
+import { insertPlatformAds } from './components/PlatformAds.js';
 
 const routes = [
   { path: '/', handler: handleHome },
@@ -49,6 +49,8 @@ onAuthStateChange(async (event, session) => {
   }
 });
 
-initPlatformAds();
-
 router.start();
+
+setTimeout(() => {
+  insertPlatformAds();
+}, 500);
