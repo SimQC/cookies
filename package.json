@@ -3,9 +3,14 @@
   "version": "1.27.1",
   "main": "tarteaucitron.js",
   "description": "tarteaucitron.io - Get a compliant and accessible cookie banner",
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "vite": "^7.2.4"
+  },
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
